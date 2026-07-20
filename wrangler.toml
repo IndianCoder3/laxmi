@@ -1,0 +1,10 @@
+name = "laxmi"
+main = "index.js"
+compatibility_date = "2026-06-01"
+
+[vars]
+GEMINI_MODEL = "gemini-3.1-flash-lite-preview"
+
+[observability.logs]
+enabled = true
+invocation_logs = true
