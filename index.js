@@ -7,7 +7,7 @@
  * Layers: Regex + Unicode normalization → AI (Gemini) classification
  */
 
-import { verifyKey } from 'discord-interactions';
+
 
 // ============================================
 // OFFENSIVE WORD LIST (English + Hindi + Hinglish)
@@ -222,12 +222,45 @@ async function sendLog(env, logEntry) {
 }
 
 // ============================================
+// IGNORED CHANNELS — bot won't moderate these
+// ============================================
+const IGNORED_CHANNELS = [
+  '1477033205017346259', // announcements
+  '1477033060078850264', // welcome
+  '1477033071076442165', // rules
+  '1499020216821088296', // information
+  '1477035122636095561', // events
+  '1477035141221060791', // giveaways
+  '1477035158770155743', // tournaments
+  '1477272501699481642', // qotd
+];
+
+// STAFF ROLES — these users are exempt from moderation
+const EXEMPT_ROLES = [
+  '1477025238784151554', // Owner
+  '1477291491003994214', // Co-Owner
+  '1502815102716608552', // Chief Manager
+  '1497335106074050620', // Sr. Manager
+  '1483209618485284964', // Manager
+  '1497316294632931358', // Developer
+  '1497316250945323070', // Admin
+  '1497316120452136960', // Sr. Mod
+  '1477025502119334109', // Mod
+];
+
+// ============================================
 // MAIN HANDLER
 // ============================================
 async function handleMessage(payload, env) {
-  const { content, channelId, messageId, userId, username } = payload;
+  const { content, channelId, messageId, userId, username, roleIds = [] } = payload;
 
   if (!content || content.trim().length === 0) return;
+
+  // Skip ignored channels
+  if (IGNORED_CHANNELS.includes(channelId)) return;
+
+  // Skip staff/exempt roles
+  if (roleIds.some(r => EXEMPT_ROLES.includes(r))) return;
 
   // Layer 1 — fast regex check
   const l1 = layer1Check(content);

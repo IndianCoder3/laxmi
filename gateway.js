@@ -82,7 +82,8 @@ client.on('messageCreate', async (message) => {
         channelId: message.channel.id,
         messageId: message.id,
         userId: message.author.id,
-        username: message.member?.displayName || message.author.username
+        username: message.member?.displayName || message.author.username,
+        roleIds: message.member?.roles.cache.map(r => r.id) || []
       })
     });
   } catch (e) {
