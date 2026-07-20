@@ -235,8 +235,22 @@ const IGNORED_CHANNELS = [
   '1477272501699481642', // qotd
 ];
 
-// STAFF ROLES — these users are exempt from moderation
-const EXEMPT_ROLES = [
+// STAFF ROLES — exempt from link/URL moderation only
+// Nobody is exempt from swear word deletion
+const LINK_EXEMPT_ROLES = [
+  '1477025238784151554', // Owner
+  '1477291491003994214', // Co-Owner
+  '1502815102716608552', // Chief Manager
+  '1497335106074050620', // Sr. Manager
+  '1483209618485284964', // Manager
+  '1497316294632931358', // Developer
+  '1497316250945323070', // Admin
+  '1497316120452136960', // Sr. Mod
+  '1477025502119334109', // Mod
+];
+
+// WARN EXEMPT — staff don't get warned, just message deleted
+const WARN_EXEMPT_ROLES = [
   '1477025238784151554', // Owner
   '1477291491003994214', // Co-Owner
   '1502815102716608552', // Chief Manager
@@ -259,15 +273,18 @@ async function handleMessage(payload, env) {
   // Skip ignored channels
   if (IGNORED_CHANNELS.includes(channelId)) return;
 
-  // Skip staff/exempt roles
-  if (roleIds.some(r => EXEMPT_ROLES.includes(r))) return;
+  const isLinkExempt = roleIds.some(r => LINK_EXEMPT_ROLES.includes(r));
+  const isWarnExempt = roleIds.some(r => WARN_EXEMPT_ROLES.includes(r));
 
   // Layer 1 — fast regex check
   const l1 = layer1Check(content);
   if (l1.flagged) {
+    // Skip if staff posting a link (link exempt)
+    if (isLinkExempt && l1.reason.toLowerCase().includes('advertising')) return;
     await deleteMessage(channelId, messageId, env);
-    await warnUser(channelId, userId, l1.reason, env);
-    await sendLog(env, { userId, username, channelId, action: 'Delete + Warn', reason: l1.reason, layer: 'Layer 1 (Regex)', confidence: l1.confidence, message: content });
+    const action = isWarnExempt ? 'Delete' : 'Delete + Warn';
+    if (!isWarnExempt) await warnUser(channelId, userId, l1.reason, env);
+    await sendLog(env, { userId, username, channelId, action, reason: l1.reason, layer: 'Layer 1 (Regex)', confidence: l1.confidence, message: content });
     return;
   }
 
@@ -279,14 +296,19 @@ async function handleMessage(payload, env) {
     return;
   }
 
+  // Log all messages from staff for audit trail (no action)
+  // Remove this block if too noisy
+
   // Layer 2 — AI check for borderline messages
   const l2 = await layer2AICheck(content, env);
   if (l2.flagged && (l2.confidence === 'high' || l2.confidence === 'medium')) {
+    // Skip if staff posting a link
+    if (isLinkExempt && l2.reason && l2.reason.toLowerCase().includes('advert')) return;
     await deleteMessage(channelId, messageId, env);
-    if (l2.confidence === 'high') {
-      await warnUser(channelId, userId, l2.reason, env);
-    }
-    await sendLog(env, { userId, username, channelId, action: l2.confidence === 'high' ? 'Delete + Warn' : 'Delete', reason: l2.reason, layer: 'Layer 2 (AI)', confidence: l2.confidence, message: content });
+    const shouldWarn = !isWarnExempt && l2.confidence === 'high';
+    if (shouldWarn) await warnUser(channelId, userId, l2.reason, env);
+    const action = shouldWarn ? 'Delete + Warn' : 'Delete';
+    await sendLog(env, { userId, username, channelId, action, reason: l2.reason, layer: 'Layer 2 (AI)', confidence: l2.confidence, message: content });
   }
 }
 
