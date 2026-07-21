@@ -2,6 +2,10 @@ name = "laxmi"
 main = "index.js"
 compatibility_date = "2026-06-01"
 
+kv_namespaces = [
+  { binding = "LAXMI_KV", id = "PASTE_YOUR_KV_ID_HERE" }
+]
+
 [vars]
 GEMINI_MODEL = "gemini-3.1-flash-lite-preview"
 

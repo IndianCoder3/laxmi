@@ -1,13 +1,6 @@
 /**
  * Laxmi | AstralyxPvP Assistant — Gateway
- * Reads ALL messages and forwards to Laxmi Worker for moderation
- * Deploy on Render as Web Service
- *
- * Required .env:
- *   DISCORD_TOKEN   = Laxmi bot token
- *   WORKER_URL      = https://laxmi.indiancoder3.workers.dev/
- *   GATEWAY_SECRET  = shared secret
- *   RENDER_URL      = https://your-laxmi-app.onrender.com
+ * Render Web Service
  */
 
 import { Client, GatewayIntentBits } from 'discord.js';
@@ -20,11 +13,6 @@ const WORKER_URL     = process.env.WORKER_URL;
 const GATEWAY_SECRET = process.env.GATEWAY_SECRET;
 const RENDER_URL     = process.env.RENDER_URL;
 const PORT           = process.env.PORT || 3001;
-
-// Channels to ignore (voice-related, staff private etc)
-const IGNORED_CHANNELS = [
-  '1477025238784151554', // add any channel IDs to skip
-];
 
 if (!DISCORD_TOKEN || !WORKER_URL || !GATEWAY_SECRET) {
   console.error('❌ Missing required env vars!');
@@ -49,46 +37,59 @@ if (RENDER_URL) {
   }, 10 * 60 * 1000);
 }
 
+async function sendToWorker(payload) {
+  try {
+    const res = await fetch(WORKER_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${GATEWAY_SECRET}`
+      },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) console.error(`❌ Worker responded with ${res.status}`);
+  } catch (e) {
+    console.error('❌ Failed to reach Worker:', e.message);
+  }
+}
+
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.GuildMembers,
     GatewayIntentBits.MessageContent
   ]
 });
 
 client.once('ready', () => {
   console.log(`✅ Laxmi online — ${client.user.tag}`);
-  console.log(`👀 Watching all messages for moderation`);
+  console.log(`👀 Watching all messages + member joins`);
 });
 
+// Auto welcome on member join
+client.on('guildMemberAdd', async (member) => {
+  console.log(`👋 New member: ${member.user.username}`);
+  await sendToWorker({
+    type: 'member_join',
+    userId: member.user.id,
+    username: member.displayName || member.user.globalName || member.user.username
+  });
+});
+
+// Message moderation
 client.on('messageCreate', async (message) => {
-  // Ignore bots
   if (message.author.bot) return;
-  // Ignore specific channels
-  if (IGNORED_CHANNELS.includes(message.channel.id)) return;
-  // Ignore empty messages
   if (!message.content || message.content.trim().length === 0) return;
 
-  try {
-    await fetch(WORKER_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${GATEWAY_SECRET}`
-      },
-      body: JSON.stringify({
-        content: message.content,
-        channelId: message.channel.id,
-        messageId: message.id,
-        userId: message.author.id,
-        username: message.member?.displayName || message.author.username,
-        roleIds: message.member?.roles.cache.map(r => r.id) || []
-      })
-    });
-  } catch (e) {
-    console.error('❌ Failed to reach Worker:', e.message);
-  }
+  await sendToWorker({
+    content: message.content,
+    channelId: message.channel.id,
+    messageId: message.id,
+    userId: message.author.id,
+    username: message.member?.displayName || message.author.username,
+    roleIds: message.member?.roles.cache.map(r => r.id) || []
+  });
 });
 
 client.login(DISCORD_TOKEN);
