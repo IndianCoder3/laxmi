@@ -3,7 +3,7 @@ main = "index.js"
 compatibility_date = "2026-06-01"
 
 kv_namespaces = [
-  { binding = "756eb1ebf2ad4bb785de39dda224f31d", id = "PASTE_YOUR_KV_ID_HERE" }
+  { binding = "LAXMI_KV", id = "756eb1ebf2ad4bb785de39dda224f31d" }
 ]
 
 [vars]
