@@ -11,7 +11,6 @@ import { verifyKey, InteractionType, InteractionResponseType } from 'discord-int
 // ============================================
 const WELCOME_CHANNEL_ID = '1477033060078850264';
 const LAXMI_WELCOMER_CHANNEL_ID = '1529028842188967977';
-const MAIN_GUILD_ID = '1477024790555672718';
 
 const NOTIFICATION_ROLES = [
   { label: '📣 Announcements', roleId: '1483166577259188406' },
@@ -20,7 +19,6 @@ const NOTIFICATION_ROLES = [
   { label: '📊 Polls', roleId: '1500206496535937195' },
 ];
 
-// Staff roles allowed to use mod commands
 const MOD_ROLES = [
   '1477025238784151554', // Owner
   '1477291491003994214', // Co-Owner
@@ -33,13 +31,9 @@ const MOD_ROLES = [
   '1477025502119334109', // Mod
 ];
 
-// Staff roles exempt from link moderation
 const LINK_EXEMPT_ROLES = [...MOD_ROLES];
-
-// Staff roles — delete only, no warn
 const WARN_EXEMPT_ROLES = [...MOD_ROLES];
 
-// Default ignored channels (can be modified via commands, stored in KV)
 const DEFAULT_IGNORED_CHANNELS = [
   '1477033205017346259', // announcements
   '1477033060078850264', // welcome
@@ -53,63 +47,91 @@ const DEFAULT_IGNORED_CHANNELS = [
 ];
 
 // ============================================
-// OFFENSIVE WORD LIST
+// OFFENSIVE WORD LIST — Enhanced
 // ============================================
 const BANNED_WORDS = [
-  // English — direct
-  'fuck', 'f**k', 'fck', 'fuk', 'fucc', 'fvck', 'frick', 'fricking', 'frickin',
-  'fudge', 'effing', 'effin',
-  'shit', 'sh1t', 'sht', 'shiit', 'shyt',
-  'bitch', 'b1tch', 'btch', 'biatch',
-  'asshole', 'a**hole', 'a55hole', 'azzhole',
+  // English — direct + bypasses
+  'fuck', 'f**k', 'fck', 'fuk', 'fucc', 'fvck', 'frick', 'fricking', 'frickin', 'frik',
+  'fudge', 'effing', 'effin', 'af',
+  'shit', 'sh1t', 'sht', 'shiit', 'shyt', 'shite',
+  'bitch', 'b1tch', 'btch', 'biatch', 'biotch',
+  'ass', 'a55', 'a**', '@ss', 'arse', 'azzhole', 'asshole', 'a**hole', 'a55hole',
   'bastard', 'b@stard', 'bastad',
-  'damn', 'dammit', 'damm',
+  'damn', 'dammit', 'damm', 'damnit',
   'crap', 'crapping',
-  'dick', 'd1ck', 'dik',
-  'cock', 'c0ck',
-  'pussy', 'puss1',
-  'nigga', 'nigger', 'n1gga', 'n1gger',
+  'sex', 's3x', 'sexx', 'seks',
+  'sexy', 's3xy',
+  'porn', 'p0rn', 'pr0n',
+  'nude', 'nudes', 'naked',
+  'dick', 'd1ck', 'dik', 'd**k',
+  'cock', 'c0ck', 'c**k',
+  'pussy', 'puss1', 'pu**y',
+  'boob', 'boobs', 'b00b', 'tit', 'tits',
+  'nigga', 'nigger', 'n1gga', 'n1gger', 'n**ga', 'n**ger',
   'retard', 'r3tard', 'tard',
-  'whore', 'wh0re',
-  'slut', 'sl*t',
+  'whore', 'wh0re', 'w**re',
+  'slut', 'sl*t', 'sl**',
   'kill yourself', 'kys', 'k.y.s', 'end yourself',
-  'rape', 'r@pe',
-  'cunt', 'c*nt',
+  'rape', 'r@pe', 'raped',
+  'cunt', 'c*nt', 'c**t',
   'prick', 'pr1ck',
   'twat', 'tw@t',
   'wanker', 'w@nker',
-  'bollocks', 'bullshit', 'bulls**t',
-  'jackass', 'dumbass', 'dumb@ss',
-  'moron', 'idiot',
-  'shut up', 'stfu',
-  'wtf', 'wth',
-  // Hindi / Hinglish
-  'madarchod', 'mc', 'maderchod', 'maa ki', 'maaki',
-  'behenchod', 'bc', 'behen chod', 'behnchod',
-  'chutiya', 'chutiye', 'chut', 'choot',
-  'bhosdike', 'bhosd', 'bhosdi', 'bhosdiwale',
-  'gandu', 'gaandu', 'g@ndu', 'gand',
-  'harami', 'haraami', 'haraamzada',
-  'randi', 'r@ndi', 'raand',
-  'saala', 'sala', 'saale',
-  'teri maa', 'teri ma', 'teri maa ki',
-  'bsdk', 'lodu', 'lund', 'lauda', 'lavda',
+  'bollocks', 'bullshit', 'bulls**t', 'bs',
+  'jackass', 'dumbass', 'dumb@ss', 'dumba**',
+  'moron', 'idiot', 'imbecile',
+  'stfu', 'gtfo', 'wtaf',
+  'milf', 'dilf',
+  'horny', 'h0rny',
+  'masturbat', 'masterbat',
+  'orgasm',
+  // Scam patterns
+  'free robux', 'free vbucks', 'free nitro',
+  'claim your prize', 'you have been selected',
+  'withdraw', 'withdrawal success',
+  'crypto bonus', 'activate code',
+  'rakeback', 'deposit bonus',
+  'dm me for', 'dm for free',
+  'bit.ly', 'tinyurl.com', 't.co/',
+  // Hindi / Hinglish — expanded
+  'madarchod', 'mc', 'maderchod', 'maa ki', 'maaki', 'madar',
+  'behenchod', 'bc', 'behen chod', 'behnchod', 'behen ke',
+  'chutiya', 'chutiye', 'chut', 'choot', 'chudai', 'chodu', 'chodna',
+  'bhosdike', 'bhosd', 'bhosdi', 'bhosdiwale', 'bhosad',
+  'gandu', 'gaandu', 'g@ndu', 'gand', 'gaand',
+  'harami', 'haraami', 'haraamzada', 'haraamkhor',
+  'randi', 'r@ndi', 'raand', 'randwa',
+  'saala', 'sala', 'saale', 'saali',
+  'teri maa', 'teri ma', 'teri maa ki', 'apni maa',
+  'bsdk', 'lodu', 'lund', 'lauda', 'lavda', 'lund',
   'chakka', 'hijra',
-  'kutte', 'kutta', 'kutiya',
-  'kamina', 'kamine', 'kamini',
-  'ullu', 'ullu ka pattha',
-  'gadha', 'gadhe',
-  'bakwas', 'bakwaas',
-  'chup', 'chup kar',
-  'nikl', 'nikal',
-  // Advertising patterns
+  'kutte', 'kutta', 'kutiya', 'kutti',
+  'kamina', 'kamine', 'kamini', 'kaminey',
+  'ullu', 'ullu ka pattha', 'ullu ke patthe',
+  'gadha', 'gadhe', 'gadhon',
+  'bhadwa', 'bhadwe',
+  'tharki', 'tharkhi',
+  'beti chod', 'betichod',
+  'balatkar', 'balaatkari',
+  'chaman chutiya', 'chamanchutiya',
+  'jhaat', 'jhaant',
+  'launde', 'launda',
+  'randi rona', 'randirona',
+  'chup kar', 'chup ho ja',
+  'nikl', 'nikal ja', 'bhag ja',
+  'tatti', 'tatty',
+  'pesab', 'peshab',
+  // Advertising
   'discord.gg/', 'dsc.gg/', 'discordapp.com/invite',
   'join my server', 'join our server', 'join my disc',
   // Staff impersonation
   'i am admin', 'i am mod', 'i am staff', "i'm admin", "i'm mod", "i'm staff",
+  'im admin', 'im mod', 'im staff',
 ];
 
 const AD_PATTERN = /discord\.gg\/[a-zA-Z0-9]+|dsc\.gg\/[a-zA-Z0-9]+|discordapp\.com\/invite\/[a-zA-Z0-9]+/i;
+const CRYPTO_SCAM_PATTERN = /\b(free\s*(nitro|robux|vbucks|crypto|bitcoin|eth)|withdrawal\s*success|claim\s*(your\s*)?(prize|reward|bonus)|activate\s*code|dm\s*(me\s*)?(for\s*)?(free|money|profit))\b/i;
+
 const recentMessages = new Map();
 
 // ============================================
@@ -139,25 +161,44 @@ function normalizeText(text) {
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
+    // Leetspeak
     .replace(/0/g, 'o').replace(/1/g, 'i').replace(/3/g, 'e')
     .replace(/4/g, 'a').replace(/5/g, 's').replace(/\$/g, 's')
     .replace(/@/g, 'a').replace(/\+/g, 't').replace(/8/g, 'b')
-    .replace(/[\u200b\u200c\u200d\u2060\ufeff]/g, '')
+    .replace(/!/g, 'i').replace(/\|/g, 'i').replace(/7/g, 't')
+    // Remove zero-width and invisible chars
+    .replace(/[\u200b\u200c\u200d\u2060\ufeff\u00ad]/g, '')
+    // Collapse spaces
     .replace(/\s+/g, ' ').trim();
 }
 
 function layer1Check(text) {
   const normalized = normalizeText(text);
+  // Check with spaces removed (catches f u c k style)
   const noSpaces = normalized.replace(/\s/g, '');
+  // Check with dots/dashes removed (catches f.u.c.k style)  
+  const noPunct = normalized.replace(/[^a-z0-9]/g, '');
+
   for (const word of BANNED_WORDS) {
     const nw = normalizeText(word).replace(/\s/g, '');
-    if (noSpaces.includes(nw) || normalized.includes(normalizeText(word))) {
-      return { flagged: true, reason: `Banned word: "${word}"`, confidence: 'high' };
+    const nwNoPunct = normalizeText(word).replace(/[^a-z0-9]/g, '');
+    if (
+      noSpaces.includes(nw) ||
+      noPunct.includes(nwNoPunct) ||
+      normalized.includes(normalizeText(word))
+    ) {
+      return { flagged: true, reason: `Banned word detected`, confidence: 'high' };
     }
   }
+
   if (AD_PATTERN.test(text)) {
     return { flagged: true, reason: 'Discord server advertising', confidence: 'high' };
   }
+
+  if (CRYPTO_SCAM_PATTERN.test(text)) {
+    return { flagged: true, reason: 'Potential scam/spam detected', confidence: 'high' };
+  }
+
   return { flagged: false };
 }
 
@@ -175,6 +216,65 @@ function raidCheck(channelId, content, userId) {
   return { flagged: false };
 }
 
+// ============================================
+// IMAGE SCANNING via Gemini Vision
+// ============================================
+async function scanImage(imageUrl, env) {
+  try {
+    const model = env.GEMINI_MODEL || 'gemini-3.1-flash-lite-preview';
+
+    // Fetch image and convert to base64
+    const imgRes = await fetch(imageUrl, { signal: AbortSignal.timeout(5000) });
+    if (!imgRes.ok) return { flagged: false };
+    const contentType = imgRes.headers.get('content-type') || 'image/jpeg';
+    if (!contentType.startsWith('image/')) return { flagged: false };
+
+    const imgBuffer = await imgRes.arrayBuffer();
+    const base64 = btoa(String.fromCharCode(...new Uint8Array(imgBuffer)));
+
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${env.GOOGLE_API_KEY}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{
+          role: 'user',
+          parts: [
+            {
+              inline_data: {
+                mime_type: contentType,
+                data: base64
+              }
+            },
+            {
+              text: `You are a Discord image moderation AI for a Minecraft PvP server for teens/kids.
+
+Analyze this image and determine if it contains:
+1. NSFW/sexual/nude content
+2. Crypto/gambling/withdrawal scams (fake MrBeast giveaways, fake withdrawal success screens, casino/betting sites, fake prize claims)
+3. Hate symbols or extreme violence
+4. Phishing or malicious links
+
+Respond ONLY with JSON (no markdown): {"flagged": true/false, "reason": "short reason or null", "confidence": "high/medium/low"}
+
+Only flag genuine violations. Gaming screenshots, memes, and normal images are fine.`
+            }
+          ]
+        }],
+        generationConfig: { temperature: 0.1, maxOutputTokens: 100 }
+      })
+    });
+
+    const data = await res.json();
+    const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+    return JSON.parse(raw.replace(/```json|```/g, '').trim());
+  } catch (e) {
+    return { flagged: false };
+  }
+}
+
+// ============================================
+// LAYER 2 — Gemini AI text classification
+// ============================================
 async function layer2AICheck(text, env) {
   try {
     const model = env.GEMINI_MODEL || 'gemini-3.1-flash-lite-preview';
@@ -182,7 +282,7 @@ async function layer2AICheck(text, env) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        contents: [{ role: 'user', parts: [{ text: `You are a Discord moderation classifier for an Indian Minecraft PvP server.\n\nAnalyze this message for: hate speech, toxicity, advertising, staff impersonation, NSFW content.\n\nMessage: "${text}"\n\nRespond ONLY with JSON (no markdown): {"flagged": true/false, "reason": "short reason or null", "confidence": "high/medium/low"}\n\nOnly flag genuine violations. Mild frustration and casual chat are NOT violations.` }] }],
+        contents: [{ role: 'user', parts: [{ text: `You are a Discord moderation classifier for an Indian Minecraft PvP server for teens.\n\nAnalyze this message for: hate speech, extreme toxicity, advertising, staff impersonation, NSFW content, scams, crypto/gambling promotion.\n\nMessage: "${text}"\n\nRespond ONLY with JSON (no markdown): {"flagged": true/false, "reason": "short reason or null", "confidence": "high/medium/low"}\n\nOnly flag genuine violations. Mild frustration, gaming talk, and casual chat are NOT violations.` }] }],
         generationConfig: { temperature: 0.1, maxOutputTokens: 100 }
       })
     });
@@ -192,6 +292,9 @@ async function layer2AICheck(text, env) {
   } catch (e) { return { flagged: false }; }
 }
 
+// ============================================
+// DISCORD ACTIONS
+// ============================================
 async function deleteMessage(channelId, messageId, env) {
   await fetch(`https://discord.com/api/v10/channels/${channelId}/messages/${messageId}`, {
     method: 'DELETE',
@@ -223,7 +326,7 @@ async function sendLog(env, logEntry) {
           { name: 'Reason', value: logEntry.reason, inline: false },
           { name: 'Layer', value: logEntry.layer, inline: true },
           { name: 'Confidence', value: logEntry.confidence, inline: true },
-          { name: 'Message', value: '```' + logEntry.message.substring(0, 500) + '```', inline: false }
+          { name: 'Message', value: '```' + (logEntry.message || '[image]').substring(0, 500) + '```', inline: false }
         ],
         timestamp: new Date().toISOString()
       }]
@@ -249,7 +352,6 @@ async function handleMemberJoin(userId, username, env) {
       title: '🙏 Welcome to AstralyxPvP!',
       description: `Namaste <@${userId}>! Welcome to **AstralyxPvP** — India's premier Minecraft Java PvP server!\n\n⚔️ **Server IP:** \`java.astralyxpvp.int.yt\`\n🌐 **Website:** [astralyxpvp.pages.dev](https://astralyxpvp.pages.dev)\n\nHead over to <#1477033060078850264> to get started, check <#1477033071076442165> for the rules, and pick up your notification roles below!\n\nSee you on the battlefield! 🔥`,
       color: 0xC8102E,
-      thumbnail: { url: 'https://astralyxpvp.pages.dev/Assets/logo.png' },
       footer: { text: `Welcome, ${username}! • AstralyxPvP` },
       timestamp: new Date().toISOString()
     }]
@@ -257,13 +359,13 @@ async function handleMemberJoin(userId, username, env) {
 }
 
 // ============================================
-// ROLE SELECTOR MESSAGE
+// ROLE SELECTOR
 // ============================================
 async function handleWelcomeReactionOptions(env) {
   await sendDiscordMessage(WELCOME_CHANNEL_ID, {
     embeds: [{
       title: '🔔 Get Notified — Pick Your Roles!',
-      description: 'Stay updated with what matters to you! Click the buttons below to assign yourself notification roles.\n\nYou can click again to remove a role anytime.',
+      description: 'Stay updated with what matters to you! Click the buttons below to assign yourself notification roles.\n\nClick again to remove a role anytime.',
       color: 0xC8102E,
       fields: NOTIFICATION_ROLES.map(r => ({
         name: r.label,
@@ -285,7 +387,7 @@ async function handleWelcomeReactionOptions(env) {
 }
 
 // ============================================
-// HANDLE ROLE BUTTON CLICK
+// ROLE BUTTON CLICK
 // ============================================
 async function handleRoleToggle(interaction, roleId, env) {
   const userId = interaction.member.user.id;
@@ -300,20 +402,19 @@ async function handleRoleToggle(interaction, roleId, env) {
   });
 
   const role = NOTIFICATION_ROLES.find(r => r.roleId === roleId);
-  const action = hasRole ? 'removed' : 'added';
   return jsonResponse({
     type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
     data: {
       content: hasRole
         ? `✅ Removed **${role?.label}** role!`
         : `✅ Added **${role?.label}** role! You'll now get notified.`,
-      flags: 64 // ephemeral
+      flags: 64
     }
   });
 }
 
 // ============================================
-// SLASH COMMAND HANDLER
+// SLASH COMMANDS
 // ============================================
 async function handleSlashCommand(interaction, env) {
   const commandName = interaction.data.name;
@@ -348,7 +449,7 @@ async function handleSlashCommand(interaction, env) {
     await setIgnoredChannels(channels, env);
     return jsonResponse({
       type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-      data: { content: `✅ Added <#${channelId}> to ignored channels. Laxmi will no longer moderate there.`, flags: 64 }
+      data: { content: `✅ Added <#${channelId}> to ignored channels.`, flags: 64 }
     });
   }
 
@@ -365,7 +466,7 @@ async function handleSlashCommand(interaction, env) {
     await setIgnoredChannels(channels, env);
     return jsonResponse({
       type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-      data: { content: `✅ Removed <#${channelId}> from ignored channels. Laxmi will now moderate there.`, flags: 64 }
+      data: { content: `✅ Removed <#${channelId}> from ignored channels.`, flags: 64 }
     });
   }
 
@@ -376,11 +477,10 @@ async function handleSlashCommand(interaction, env) {
 }
 
 // ============================================
-// AUTOMOD HANDLER
+// MAIN AUTOMOD HANDLER
 // ============================================
 async function handleMessage(payload, env) {
-  const { content, channelId, messageId, userId, username, roleIds = [] } = payload;
-  if (!content || content.trim().length === 0) return;
+  const { content, channelId, messageId, userId, username, roleIds = [], attachments = [] } = payload;
 
   const ignoredChannels = await getIgnoredChannels(env);
   if (ignoredChannels.includes(channelId)) return;
@@ -388,30 +488,52 @@ async function handleMessage(payload, env) {
   const isLinkExempt = roleIds.some(r => LINK_EXEMPT_ROLES.includes(r));
   const isWarnExempt = roleIds.some(r => WARN_EXEMPT_ROLES.includes(r));
 
-  const l1 = layer1Check(content);
-  if (l1.flagged) {
-    if (isLinkExempt && l1.reason.toLowerCase().includes('advertising')) return;
-    await deleteMessage(channelId, messageId, env);
-    const action = isWarnExempt ? 'Delete' : 'Delete + Warn';
-    if (!isWarnExempt) await warnUser(channelId, userId, l1.reason, env);
-    await sendLog(env, { userId, username, channelId, action, reason: l1.reason, layer: 'Layer 1 (Regex)', confidence: l1.confidence, message: content });
-    return;
+  // ---- TEXT CHECKS ----
+  if (content && content.trim().length > 0) {
+    const l1 = layer1Check(content);
+    if (l1.flagged) {
+      if (isLinkExempt && (l1.reason.includes('advertising') || l1.reason.includes('scam'))) return;
+      await deleteMessage(channelId, messageId, env);
+      const action = isWarnExempt ? 'Delete' : 'Delete + Warn';
+      if (!isWarnExempt) await warnUser(channelId, userId, l1.reason, env);
+      await sendLog(env, { userId, username, channelId, action, reason: l1.reason, layer: 'Layer 1 (Regex)', confidence: l1.confidence, message: content });
+      return;
+    }
+
+    const raid = raidCheck(channelId, content, userId);
+    if (raid.flagged) {
+      await deleteMessage(channelId, messageId, env);
+      await sendLog(env, { userId, username, channelId, action: 'Delete', reason: raid.reason, layer: 'Raid Detection', confidence: raid.confidence, message: content });
+      return;
+    }
+
+    const l2 = await layer2AICheck(content, env);
+    if (l2.flagged && (l2.confidence === 'high' || l2.confidence === 'medium')) {
+      if (isLinkExempt && l2.reason?.toLowerCase().includes('advert')) return;
+      await deleteMessage(channelId, messageId, env);
+      const shouldWarn = !isWarnExempt && l2.confidence === 'high';
+      if (shouldWarn) await warnUser(channelId, userId, l2.reason, env);
+      await sendLog(env, { userId, username, channelId, action: shouldWarn ? 'Delete + Warn' : 'Delete', reason: l2.reason, layer: 'Layer 2 (AI)', confidence: l2.confidence, message: content });
+      return;
+    }
   }
 
-  const raid = raidCheck(channelId, content, userId);
-  if (raid.flagged) {
-    await deleteMessage(channelId, messageId, env);
-    await sendLog(env, { userId, username, channelId, action: 'Delete', reason: raid.reason, layer: 'Raid Detection', confidence: raid.confidence, message: content });
-    return;
-  }
+  // ---- IMAGE CHECKS ----
+  if (attachments && attachments.length > 0) {
+    for (const attachment of attachments) {
+      if (!attachment.url) continue;
+      const contentType = attachment.content_type || '';
+      if (!contentType.startsWith('image/')) continue;
 
-  const l2 = await layer2AICheck(content, env);
-  if (l2.flagged && (l2.confidence === 'high' || l2.confidence === 'medium')) {
-    if (isLinkExempt && l2.reason?.toLowerCase().includes('advert')) return;
-    await deleteMessage(channelId, messageId, env);
-    const shouldWarn = !isWarnExempt && l2.confidence === 'high';
-    if (shouldWarn) await warnUser(channelId, userId, l2.reason, env);
-    await sendLog(env, { userId, username, channelId, action: shouldWarn ? 'Delete + Warn' : 'Delete', reason: l2.reason, layer: 'Layer 2 (AI)', confidence: l2.confidence, message: content });
+      const imgResult = await scanImage(attachment.url, env);
+      if (imgResult.flagged && (imgResult.confidence === 'high' || imgResult.confidence === 'medium')) {
+        await deleteMessage(channelId, messageId, env);
+        const shouldWarn = !isWarnExempt && imgResult.confidence === 'high';
+        if (shouldWarn) await warnUser(channelId, userId, imgResult.reason || 'Inappropriate image', env);
+        await sendLog(env, { userId, username, channelId, action: shouldWarn ? 'Delete + Warn' : 'Delete', reason: imgResult.reason || 'Inappropriate image', layer: 'Image Scan (Gemini Vision)', confidence: imgResult.confidence, message: `[Image: ${attachment.filename || 'unknown'}]` });
+        return;
+      }
+    }
   }
 }
 
@@ -428,7 +550,7 @@ export default {
 
     const authHeader = request.headers.get('authorization');
 
-    // Discord interaction (slash commands / buttons)
+    // Discord interactions (slash commands + buttons)
     if (request.headers.get('x-signature-ed25519')) {
       const signature = request.headers.get('x-signature-ed25519');
       const timestamp = request.headers.get('x-signature-timestamp');
@@ -458,20 +580,18 @@ export default {
       return jsonResponse({ type: InteractionResponseType.PONG });
     }
 
-    // Gateway message forwarding
+    // Gateway forwarding
     if (!authHeader || authHeader !== `Bearer ${env.GATEWAY_SECRET}`) {
       return jsonResponse({ error: 'Unauthorized' }, 401);
     }
 
     const payload = await request.json();
 
-    // Member join event
     if (payload.type === 'member_join') {
       ctx.waitUntil(handleMemberJoin(payload.userId, payload.username, env));
       return jsonResponse({ ok: true });
     }
 
-    // Regular message moderation
     ctx.waitUntil(handleMessage(payload, env));
     return jsonResponse({ ok: true });
   }
