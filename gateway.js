@@ -19,6 +19,7 @@ if (!DISCORD_TOKEN || !WORKER_URL || !GATEWAY_SECRET) {
   process.exit(1);
 }
 
+// Keep Render alive
 const server = http.createServer((req, res) => {
   res.writeHead(200);
   res.end('Laxmi is watching 👀');
@@ -66,6 +67,7 @@ client.once('ready', () => {
   console.log(`👀 Watching all messages + member joins`);
 });
 
+// Auto welcome on member join
 client.on('guildMemberAdd', async (member) => {
   console.log(`👋 New member: ${member.user.username}`);
   await sendToWorker({
@@ -75,27 +77,18 @@ client.on('guildMemberAdd', async (member) => {
   });
 });
 
+// Message moderation
 client.on('messageCreate', async (message) => {
   if (message.author.bot) return;
-
-  // Extract attachments with type info
-  const attachments = message.attachments.map(a => ({
-    url: a.url,
-    filename: a.name,
-    content_type: a.contentType || ''
-  }));
-
-  // Skip if no content and no attachments
-  if (!message.content?.trim() && attachments.length === 0) return;
+  if (!message.content || message.content.trim().length === 0) return;
 
   await sendToWorker({
-    content: message.content || '',
+    content: message.content,
     channelId: message.channel.id,
     messageId: message.id,
     userId: message.author.id,
     username: message.member?.displayName || message.author.username,
-    roleIds: message.member?.roles.cache.map(r => r.id) || [],
-    attachments
+    roleIds: message.member?.roles.cache.map(r => r.id) || []
   });
 });
 
